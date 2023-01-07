@@ -1,4 +1,4 @@
-module github.com/bytebuilders/cert-manager-webhook-appscode
+module go.bytebuilders.dev/cert-manager-webhook-appscode
 
 go 1.18
 
