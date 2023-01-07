@@ -1,4 +1,4 @@
-module github.com/okteto/cert-manager-webhook-civo
+module github.com/bytebuilders/cert-manager-webhook-appscode
 
 go 1.18
 

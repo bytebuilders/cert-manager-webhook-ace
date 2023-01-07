@@ -1,5 +1,5 @@
 deploy:
-- helm upgrade --install cert-manager-webhook-civo chart/cert-manager-webhook-civo
+- helm upgrade --install cert-manager-webhook-appscode chart/cert-manager-webhook-appscode
 dev:
   webhook:
     command: bash

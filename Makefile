@@ -20,7 +20,7 @@ readme:
 	helm-docs
 
 chart:
-	helm package chart/cert-manager-webhook-civo --app-version ${TAG}
+	helm package chart/cert-manager-webhook-appscode --app-version ${TAG}
 	mkdir -p output
 	mv *.tgz output/
 

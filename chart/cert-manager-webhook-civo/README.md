@@ -1,4 +1,4 @@
-# cert-manager-webhook-civo
+# cert-manager-webhook-appscode
 
 ![Version: 0.3.2](https://img.shields.io/badge/Version-0.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.3.2](https://img.shields.io/badge/AppVersion-0.3.2-informational?style=flat-square)
 
@@ -15,7 +15,7 @@ Follow the [instructions](https://cert-manager.io/docs/installation/) using the 
 ```bash
 helm repo add okteto https://charts.okteto.com
 helm repo update
-helm install --namespace cert-manager cert-manager-webhook-civo okteto/cert-manager-webhook-civo
+helm install --namespace cert-manager cert-manager-webhook-appscode bytebuilders/cert-manager-webhook-appscode
 ```
 
 ## Uninstalling
@@ -23,7 +23,7 @@ helm install --namespace cert-manager cert-manager-webhook-civo okteto/cert-mana
 To uninstall the webhook run
 
 ```bash
-helm uninstall --namespace cert-manager cert-manager-webhook-civo
+helm uninstall --namespace cert-manager cert-manager-webhook-appscode
 ```
 
 ## Usage
@@ -148,4 +148,4 @@ spec:
 
 # Contributing
 
-This chart is maintained at https://github.com/okteto/cert-manager-webhook-civo.
+This chart is maintained at https://github.com/bytebuilders/cert-manager-webhook-appscode.

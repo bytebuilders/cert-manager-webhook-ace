@@ -1,8 +1,8 @@
 # Cert-Manager ACME DNS01 Webhook Solver for CIVO DNS
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/okteto/cert-manager-webhook-civo)](https://goreportcard.com/report/github.com/okteto/cert-manager-webhook-civo)
-[![Releases](https://img.shields.io/github/v/release/okteto/cert-manager-webhook-civo?include_prereleases)](https://github.com/okteto/cert-manager-webhook-civo/releases)
-[![LICENSE](https://img.shields.io/github/license/okteto/cert-manager-webhook-civo)](https://github.com/slicen/cert-manager-webhook-civo/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bytebuilders/cert-manager-webhook-appscode)](https://goreportcard.com/report/github.com/bytebuilders/cert-manager-webhook-appscode)
+[![Releases](https://img.shields.io/github/v/release/bytebuilders/cert-manager-webhook-appscode?include_prereleases)](https://github.com/bytebuilders/cert-manager-webhook-appscode/releases)
+[![LICENSE](https://img.shields.io/github/license/bytebuilders/cert-manager-webhook-appscode)](https://github.com/slicen/cert-manager-webhook-appscode/blob/master/LICENSE)
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/okteto)](https://artifacthub.io/packages/search?repo=okteto)
 
 This solver can be used when you want to use  [cert-manager](https://github.com/jetstack/cert-manager) with [CIVO DNS](https://civo.com). 
@@ -20,19 +20,19 @@ Follow the [instructions](https://cert-manager.io/docs/installation/) using the 
 ```bash
 helm repo add okteto https://charts.okteto.com
 helm repo update
-helm install --namespace cert-manager cert-manager-webhook-civo okteto/cert-manager-webhook-civo
+helm install --namespace cert-manager cert-manager-webhook-appscode bytebuilders/cert-manager-webhook-appscode
 ```
 
 #### From local checkout
 
 ```bash
-helm install --namespace cert-manager cert-manager-webhook-civo chart/cert-manager-webhook-civo
+helm install --namespace cert-manager cert-manager-webhook-appscode chart/cert-manager-webhook-appscode
 ```
 **Note**: The kubernetes resources used to install the Webhook should be deployed within the same namespace as the cert-manager.
 
 To uninstall the webhook run
 ```bash
-helm uninstall --namespace cert-manager cert-manager-webhook-civo
+helm uninstall --namespace cert-manager cert-manager-webhook-appscode
 ```
 
 ## Usage
@@ -139,7 +139,7 @@ spec:
 
 ## Launch your Development Environment
 
-1. Deploy the latest version of `cert-manager` and `cert-manager-webhook-civo` as per the instructions above.
+1. Deploy the latest version of `cert-manager` and `cert-manager-webhook-appscode` as per the instructions above.
 1. Run `okteto up` from the root of this repo. This will deploy your pre-configured remote development environment, and keep your file system synchronized automatically.
 1. Run `make` on the remote terminal to start the webhook. This will build the webhook, start it with the required configuration, and hot reload it whenever a file is changed.
 1. Code away!
