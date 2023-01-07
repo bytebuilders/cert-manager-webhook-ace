@@ -32,7 +32,7 @@ helm uninstall --namespace cert-manager cert-manager-webhook-appscode
 In order to access the CIVO API, the webhook needs an [API token](https://www.civo.com/account/security).
 
 ```
-kubectl create secret generic civo-secret --from-literal=api-key=<YOUR_CIVO_TOKEN>
+kubectl create secret generic ace-secret --from-literal=api-key=<YOUR_CIVO_TOKEN>
 ```
 
 ### Create Issuer
@@ -60,10 +60,10 @@ spec:
     solvers:
     - dns01:
         webhook:
-          solverName: "civo"
-          groupName: civo.webhook.okteto.com
+          solverName: "appscode"
+          groupName: dns-proxy.appscode.com
           config:
-            secretName: civo-secret
+            secretName: ace-secret
 ```
 
 By default, the CIVO API token used will be obtained from the secret in the same namespace as the webhook.
@@ -93,10 +93,10 @@ spec:
     solvers:
     - dns01:
         webhook:
-          solverName: "civo"
-          groupName: civo.webhook.okteto.com
+          solverName: "appscode"
+          groupName: dns-proxy.appscode.com
           config:
-            secretName: civo-secret
+            secretName: ace-secret
 ```
 
 By default, the webhook doesn't have permissions to read secrets on all namespaces. To enable this, you'll need to provide your own service account.
@@ -129,7 +129,7 @@ spec:
 | certManager.namespace | string | `"cert-manager"` | cert-manager's namespace |
 | certManager.serviceAccountName | string | `"cert-manager"` | cert-manager's serviceAccountName |
 | fullnameOverride | string | `""` | Override the full name of the created resources |
-| groupName | string | `"civo.webhook.okteto.com"` | groupName for the webhook, issuers and clusterIssuers must match this |
+| groupName | string | `"dns-proxy.appscode.com"` | groupName for the webhook, issuers and clusterIssuers must match this |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"okteto/civo-webhook"` | Image repository |
 | image.tag | string | `"0.3.2"` |  |

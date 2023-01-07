@@ -6,10 +6,10 @@ spec:
   acme:
     # The ACME server URL
     server: https://acme-staging-v02.api.letsencrypt.org/directory
-    
+
     # Email address used for ACME registration
-    email: ramiro@okteto.com # REPLACE THIS WITH YOUR EMAIL
-    
+    email: tamal@appscode.com # REPLACE THIS WITH YOUR EMAIL
+
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt-staging
@@ -17,7 +17,7 @@ spec:
     solvers:
     - dns01:
         webhook:
-          solverName: "civo"
-          groupName: civo.webhook.okteto.com
+          solverName: "appscode"
+          groupName: dns-proxy.appscode.com
           config:
-            secretName: civo-secret
+            secretName: ace-secret

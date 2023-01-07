@@ -17,7 +17,7 @@ spec:
     solvers:
     - dns01:
         webhook:
-          solverName: "civo"
-          groupName: civo.webhook.okteto.com
+          solverName: "appscode"
+          groupName: dns-proxy.appscode.com
           config:
-            secretName: civo-secret
+            secretName: ace-secret

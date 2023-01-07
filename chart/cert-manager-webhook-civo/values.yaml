@@ -1,5 +1,5 @@
 # -- groupName for the webhook, issuers and clusterIssuers must match this
-groupName: civo.webhook.okteto.com
+groupName: dns-proxy.appscode.com
 
 # -- region on CIVO
 region: NYC1
