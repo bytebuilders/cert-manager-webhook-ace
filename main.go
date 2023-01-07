@@ -82,7 +82,8 @@ func (c *civoDNSProviderSolver) Present(ch *whapi.ChallengeRequest) error {
 		Value:    ch.Key,
 		Type:     civogo.DNSRecordTypeTXT,
 		Priority: 10,
-		TTL:      600}
+		TTL:      600,
+	}
 
 	log.Infof("creating DNS record %s/%s", d.ID, r.Name)
 	_, err = client.CreateDNSRecord(d.ID, r)
@@ -138,7 +139,6 @@ func (c *civoDNSProviderSolver) newClientFromConfig(ch *whapi.ChallengeRequest) 
 	}
 
 	return civogo.NewClient(apiKey, c.region)
-
 }
 
 func (c *civoDNSProviderSolver) loadConfig(ch *whapi.ChallengeRequest) (*civoDNSProviderConfig, error) {
