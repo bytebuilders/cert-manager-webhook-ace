@@ -1,6 +1,6 @@
 apiVersion: v2
 name: cert-manager-webhook-appscode
-description: A webhook to use CIVO DNS as a DNS issuer for cert-manager
+description: A webhook to use AppsCode DNS Proxy for Cloudflare as a DNS issuer for cert-manager
 home: https://github.com/bytebuilders/cert-manager-webhook-appscode
 type: application
 version: 0.3.2

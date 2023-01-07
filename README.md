@@ -1,11 +1,11 @@
-# Cert-Manager ACME DNS01 Webhook Solver for CIVO DNS
+# Cert-Manager ACME DNS01 Webhook Solver for AppsCode DNS Proxy for Cloudflare
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/bytebuilders/cert-manager-webhook-appscode)](https://goreportcard.com/report/github.com/bytebuilders/cert-manager-webhook-appscode)
 [![Releases](https://img.shields.io/github/v/release/bytebuilders/cert-manager-webhook-appscode?include_prereleases)](https://github.com/bytebuilders/cert-manager-webhook-appscode/releases)
 [![LICENSE](https://img.shields.io/github/license/bytebuilders/cert-manager-webhook-appscode)](https://github.com/slicen/cert-manager-webhook-appscode/blob/master/LICENSE)
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/okteto)](https://artifacthub.io/packages/search?repo=okteto)
 
-This solver can be used when you want to use  [cert-manager](https://github.com/jetstack/cert-manager) with [CIVO DNS](https://civo.com). 
+This solver can be used when you want to use  [cert-manager](https://github.com/cert-manager/cert-manager) with AppsCode DNS Proxy for Cloudflare. 
 
 ## Installation
 
