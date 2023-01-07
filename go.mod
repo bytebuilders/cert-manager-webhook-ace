@@ -3,7 +3,7 @@ module go.bytebuilders.dev/cert-manager-webhook-appscode
 go 1.18
 
 require (
-	github.com/cert-manager/cert-manager v1.10.0
+	github.com/cert-manager/cert-manager v1.10.1
 	github.com/civo/civogo v0.3.4
 	github.com/sirupsen/logrus v1.8.1
 	k8s.io/apimachinery v0.25.2
