@@ -130,25 +130,6 @@ spec:
   secretName: example-cert
 ```
 
-# Development
+# Acknowledgement
 
-## Prerequisites
--  Admin access to a cluster. We recommend you [launch one on CIVO](https://www.civo.com/?ref=af9018).
--  [okteto CLI](https://okteto.com/docs/getting-started/installation)
-- `kubectl` installed and configured to talk to your cluster
-
-## Launch your Development Environment
-
-1. Deploy the latest version of `cert-manager` and `cert-manager-webhook-appscode` as per the instructions above.
-1. Run `okteto up` from the root of this repo. This will deploy your pre-configured remote development environment, and keep your file system synchronized automatically.
-1. Run `make` on the remote terminal to start the webhook. This will build the webhook, start it with the required configuration, and hot reload it whenever a file is changed.
-1. Code away!
-
-# Contributing
-If you want to get involved, we'd love to receive a pull request, issues, or an offer to help over at the [#KUBE100](https://app.slack.com/client/TKW8H5MBK/CMVCKMCN5) channel in the Civo-Community slack or at the [#Okteto](https://kubernetes.slack.com/messages/CM1QMQGS0/) channel in the Kubernetes slack.
-
-Maintainers:
-- [Ramiro Berrelleza](https://twitter.com/rberrelleza)
-- [Pablo Chico de Guzman](https://twitter.com/pchico83)
-
-Please see the [contribution guidelines](CONTRIBUTING.md)
+Forked from https://github.com/okteto/cert-manager-webhook-civo
