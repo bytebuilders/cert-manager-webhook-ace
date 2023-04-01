@@ -350,7 +350,7 @@ lint: $(BUILD_DIRS)
 $(BUILD_DIRS):
 	@mkdir -p $@
 
-KUBE_NAMESPACE    ?= kubeops
+KUBE_NAMESPACE    ?= cert-manager
 REGISTRY_SECRET   ?=
 IMAGE_PULL_POLICY	?= IfNotPresent
 
@@ -360,18 +360,13 @@ else
 	IMAGE_PULL_SECRETS = --set imagePullSecrets[0].name=$(REGISTRY_SECRET)
 endif
 
-PLATFORM_BASEURL ?= $(PLATFORM_BASEURL)
-PLATFORM_TOKEN   ?= $(PLATFORM_TOKEN)
-
 .PHONY: install
 install:
 	@cd ../installer; \
-	helm upgrade -i cert-manager-webhook-ace charts/cert-manager-webhook-ace --wait \
+	helm upgrade -i cert-manager-webhook-ace charts/cert-manager-webhook-ace --wait --debug \
 		--namespace=$(KUBE_NAMESPACE) --create-namespace \
 		--set image.tag=$(TAG_PROD) \
 		--set imagePullPolicy=$(IMAGE_PULL_POLICY) \
-		--set platform.baseURL=$(PLATFORM_BASEURL) \
-		--set platform.token=$(PLATFORM_TOKEN) \
 		$(IMAGE_PULL_SECRETS); \
 
 .PHONY: uninstall
