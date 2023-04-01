@@ -15,7 +15,7 @@ Follow the [instructions](https://cert-manager.io/docs/installation/) using the 
 ```bash
 helm repo add appscode https://charts.appscode.com/stable/
 helm repo update
-helm upgrade -i cert-manager-webhook-ace okteto/cert-manager-webhook-ace \
+helm upgrade -i cert-manager-webhook-ace appscode/cert-manager-webhook-ace \
   --namespace cert-manager --create-namespace
 ```
 
