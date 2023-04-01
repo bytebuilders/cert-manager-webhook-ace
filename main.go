@@ -119,7 +119,7 @@ func (c *aceDNSProviderSolver) newClientFromConfig(ch *whapi.ChallengeRequest) (
 		return nil, err
 	}
 
-	log.Info("preparing to create Cloudflare provider")
+	log.Info("preparing to create ace provider")
 	if cfg.APIKey != nil && cfg.APIToken != nil {
 		return nil, fmt.Errorf("API key and API token secret references are both present")
 	}
@@ -146,7 +146,7 @@ func (c *aceDNSProviderSolver) newClientFromConfig(ch *whapi.ChallengeRequest) (
 	email := cfg.Email
 	p, err := cloudflare.NewDNSProviderCredentials(cfg.BaseURL, email, apiKey, apiToken, dnsutil.RecursiveNameservers, c.userAgent)
 	if err != nil {
-		return nil, fmt.Errorf("error instantiating cloudflare challenge solver: %s", err)
+		return nil, fmt.Errorf("error instantiating ace challenge solver: %s", err)
 	}
 	return p, nil
 }
