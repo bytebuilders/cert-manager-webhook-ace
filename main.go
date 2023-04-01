@@ -7,12 +7,14 @@ import (
 	"os"
 	"strings"
 
+	"go.bytebuilders.dev/cert-manager-webhook-ace/cloudflare"
+
 	whapi "github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
-
-	"github.com/civo/civogo"
-
+	dnsutil "github.com/cert-manager/cert-manager/pkg/issuer/acme/dns/util"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -27,42 +29,50 @@ func init() {
 func main() {
 	ctx := context.Background()
 
-	region := os.Getenv("REGION")
-	if region == "" {
-		region = "NYC1"
-	}
-
 	groupName := os.Getenv("GROUP_NAME")
 	if groupName == "" {
 		panic("GROUP_NAME must be specified")
 	}
 
 	cmd.RunWebhookServer(groupName,
-		&civoDNSProviderSolver{ctx: ctx},
+		&aceDNSProviderSolver{ctx: ctx},
 	)
 }
 
-type civoDNSProviderSolver struct {
-	client *kubernetes.Clientset
-	ctx    context.Context
-	region string
+type aceDNSProviderSolver struct {
+	client    *kubernetes.Clientset
+	ctx       context.Context
+	userAgent string
 }
 
-type civoDNSProviderConfig struct {
-	SecretRef string `json:"secretName"`
+type aceDNSProviderConfig struct {
+	// Email of the account, only required when using API key based authentication.
+	Email string
+
+	// BaseURL of Cloudflare api, only required for running custom api proxy
+	BaseURL string
+
+	// API key to use to authenticate with Cloudflare.
+	// Note: using an API token to authenticate is now the recommended method
+	// as it allows greater control of permissions.
+	APIKey *core.SecretKeySelector
+
+	// API token used to authenticate with Cloudflare.
+	APIToken *core.SecretKeySelector
 }
 
-func (c *civoDNSProviderSolver) Initialize(kubeClientConfig *restclient.Config, stopCh <-chan struct{}) error {
+func (c *aceDNSProviderSolver) Initialize(kubeClientConfig *restclient.Config, stopCh <-chan struct{}) error {
 	cl, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
 		return err
 	}
 
 	c.client = cl
+	c.userAgent = kubeClientConfig.UserAgent
 	return nil
 }
 
-func (c *civoDNSProviderSolver) Present(ch *whapi.ChallengeRequest) error {
+func (c *aceDNSProviderSolver) Present(ch *whapi.ChallengeRequest) error {
 	log.Infof("Presenting challenge for fqdn=%s zone=%s", ch.ResolvedFQDN, ch.ResolvedZone)
 	client, err := c.newClientFromConfig(ch)
 	if err != nil {
@@ -70,79 +80,63 @@ func (c *civoDNSProviderSolver) Present(ch *whapi.ChallengeRequest) error {
 		return err
 	}
 
-	rn := strings.TrimSuffix(ch.ResolvedFQDN, "."+ch.ResolvedZone)
-	d, err := client.GetDNSDomain(strings.TrimSuffix(ch.ResolvedZone, "."))
-	if err != nil {
-		log.Errorf("failed to get DNS domain '%s' from civo: %s", ch.ResolvedZone, err)
-		return err
-	}
-
-	r := &civogo.DNSRecordConfig{
-		Name:     rn,
-		Value:    ch.Key,
-		Type:     civogo.DNSRecordTypeTXT,
-		Priority: 10,
-		TTL:      600}
-
-	log.Infof("creating DNS record %s/%s", d.ID, r.Name)
-	_, err = client.CreateDNSRecord(d.ID, r)
-	if err != nil {
-		log.Errorf("failed to create DNS Record '%s': %s", r.Name, err)
-		return err
-	}
-
-	log.Infof("Successfully created txt record for fqdn=%s zone=%s", ch.ResolvedFQDN, ch.ResolvedZone)
-	return nil
+	return client.Present(strings.TrimSuffix(ch.ResolvedZone, "."), ch.ResolvedFQDN, ch.Key)
 }
 
-func (c *civoDNSProviderSolver) CleanUp(ch *whapi.ChallengeRequest) error {
+func (c *aceDNSProviderSolver) CleanUp(ch *whapi.ChallengeRequest) error {
 	log.Infof("Cleaning up entry for fqdn=%s", ch.ResolvedFQDN)
 	client, err := c.newClientFromConfig(ch)
 	if err != nil {
 		log.Errorf("failed to get client from ChallengeRequest: %s", err)
 		return fmt.Errorf("failed to get client from ChallengeRequest: %w", err)
 	}
-	rn := strings.TrimSuffix(ch.ResolvedFQDN, "."+ch.ResolvedZone)
-	r, err := getDNSRecord(client, rn, strings.TrimSuffix(ch.ResolvedZone, "."), ch.Key)
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.DeleteDNSRecord(r)
-	if err != nil {
-		log.Errorf("failed to delete DNS record '%s': %s", r.Name, err)
-		return fmt.Errorf("failed to delete DNS record '%s': %s", r.Name, err)
-	}
-
-	if resp.Result == "success" {
-		return nil
-	}
-
-	log.Errorf("failed to delete DNS record '%s': %s", r.Name, resp)
-	return fmt.Errorf("failed to delete DNS record '%s': %s", r.Name, resp)
+	return client.CleanUp(strings.TrimSuffix(ch.ResolvedZone, "."), ch.ResolvedFQDN, ch.Key)
 }
 
-func (c *civoDNSProviderSolver) Name() string {
-	return "civo"
+func (c *aceDNSProviderSolver) Name() string {
+	return "ace"
 }
 
-func (c *civoDNSProviderSolver) newClientFromConfig(ch *whapi.ChallengeRequest) (*civogo.Client, error) {
+func (c *aceDNSProviderSolver) newClientFromConfig(ch *whapi.ChallengeRequest) (*cloudflare.DNSProvider, error) {
 	cfg, err := c.loadConfig(ch)
 	if err != nil {
 		return nil, err
 	}
 
-	apiKey, err := c.getSecretData(cfg.SecretRef, ch.ResourceNamespace)
+	log.Info("preparing to create Cloudflare provider")
+	if cfg.APIKey != nil && cfg.APIToken != nil {
+		return nil, fmt.Errorf("API key and API token secret references are both present")
+	}
+
+	var selector *core.SecretKeySelector
+	if cfg.APIKey != nil {
+		selector = cfg.APIKey
+	} else {
+		selector = cfg.APIToken
+	}
+
+	keyData, err := c.loadSecretData(selector, ch.ResourceNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	return civogo.NewClient(apiKey, c.region)
+	var apiKey, apiToken string
+	if cfg.APIKey != nil {
+		apiKey = string(keyData)
+	} else {
+		apiToken = string(keyData)
+	}
 
+	email := cfg.Email
+	p, err := cloudflare.NewDNSProviderCredentials(cfg.BaseURL, email, apiKey, apiToken, dnsutil.RecursiveNameservers, c.userAgent)
+	if err != nil {
+		return nil, fmt.Errorf("error instantiating cloudflare challenge solver: %s", err)
+	}
+	return p, nil
 }
 
-func (c *civoDNSProviderSolver) loadConfig(ch *whapi.ChallengeRequest) (*civoDNSProviderConfig, error) {
-	cfg := &civoDNSProviderConfig{}
+func (c *aceDNSProviderSolver) loadConfig(ch *whapi.ChallengeRequest) (*aceDNSProviderConfig, error) {
+	cfg := &aceDNSProviderConfig{}
 	if ch.Config == nil {
 		return cfg, nil
 	}
@@ -154,43 +148,15 @@ func (c *civoDNSProviderSolver) loadConfig(ch *whapi.ChallengeRequest) (*civoDNS
 	return cfg, nil
 }
 
-func (c *civoDNSProviderSolver) getSecretData(secretName string, ns string) (string, error) {
-	secret, err := c.client.CoreV1().Secrets(ns).Get(c.ctx, secretName, metav1.GetOptions{})
+func (c *aceDNSProviderSolver) loadSecretData(selector *core.SecretKeySelector, ns string) ([]byte, error) {
+	secret, err := c.client.CoreV1().Secrets(ns).Get(c.ctx, selector.Name, metav1.GetOptions{})
 	if err != nil {
-		return "", fmt.Errorf("failed to load secret %s/%s: %w", ns, secretName, err)
+		return nil, errors.Wrapf(err, "failed to load secret %q", ns+"/"+selector.Name)
 	}
 
-	if data, ok := secret.Data["api-key"]; ok {
-		return string(data), nil
+	if data, ok := secret.Data[selector.Key]; ok {
+		return data, nil
 	}
 
-	return "", fmt.Errorf("no key %s in secret %s/%s", "api-key", ns, secretName)
-}
-
-func getDNSRecord(client *civogo.Client, rn, domain, key string) (*civogo.DNSRecord, error) {
-	log.Infof("getting domain %s from civo", domain)
-	d, err := client.GetDNSDomain(domain)
-	if err != nil {
-		log.Errorf("failed to get DNS host '%s' in domain '%s' from civo: %s", rn, domain, err)
-		return nil, err
-	}
-
-	log.Infof("getting DNS record %s/%s from civo", d.ID, rn)
-	rs, err := client.ListDNSRecords(d.ID)
-	if err != nil {
-		log.Errorf("failed to get DNS Records for '%s': %s", d.ID, err)
-		return nil, err
-	}
-
-	for _, r := range rs {
-		if r.Name == rn {
-			if r.Value == key {
-				return &r, nil
-			}
-
-			log.Infof("Records value for %s does not match %s", r.Name, key)
-		}
-	}
-
-	return nil, fmt.Errorf("record not found")
+	return nil, errors.Errorf("no key %q in secret %q", selector.Key, ns+"/"+selector.Name)
 }
